@@ -1,0 +1,26 @@
+**Problem Statement**
+- Design and Development of a single-player 15-Puzzle Game.
+
+**Rules**
+- The game board is a 4x4 grid containing 15 tiles numbered 1 to 15 and one empty space.
+- At the start of a new game, the tiles will be shuffled into a random, solvable configuration.
+- A tile can only be moved into an adjacent (horizontally or vertically) empty space. Diagonal moves are not allowed.
+- Each individual slide of a tile into the empty space counts as one move.
+- The game is won when the tiles are arranged in ascending numerical order (1-15), with the empty space in the bottom-right corner.
+
+**Constraints**
+- The board size should be a 4x4 grid with 15 tiles (numbered 1 to 15) and one empty space.
+- The block can move only into adjacent empty spaces; diagonal movement is not allowed.
+- The movement of blocks must be contained within the grid itself.
+- Tile movements should appear instantaneous to the user.
+- Tiles cannot overlap.
+- The game is considered to be completed when all the blocks are arranged in ascending order and the empty space is at the bottom-right corner of the grid.
+- User input is restricted to mouse clicks or keyboard arrow keys.
+
+**Features**
+- The game will track the number of moves made.
+- A timer will start on the first move and stop when the puzzle is solved.
+- The following statistics will persist for the session:
+  - Total number of games played.
+  - Fastest (minimum) time taken to solve.
+  - Slowest (maximum) time taken to solve.
