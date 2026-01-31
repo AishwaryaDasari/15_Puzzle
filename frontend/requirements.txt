@@ -1,0 +1,11 @@
+ REQUIREMENTS:
+1. It is a 15 puzzlegame
+2. Background colour - light purple/lilac
+3. at the centre,  a 4 x 4 grid should be present 
+4. there are 15 tiles ,numbered from 1 to 15 , each present in each square of the grid and 1 empty square is left
+5. on top of the grid , at the centre ,there should be a large bold heading '15 puzzle' of a contrasting darker colour 
+6. a timer in between the grid and the heading,at the left, which updates every second during the gameplay
+7. a counter named 'MOVES' in between the grid and the heading which updates after every move
+8. a pause button at the bottom of the grid 
+9. a restart button below the pause button 
+
