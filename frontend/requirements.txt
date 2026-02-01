@@ -1,11 +1,29 @@
- REQUIREMENTS:
+ **REQUIREMENTS**
 1. It is a 15 puzzlegame
 2. Background colour - light purple/lilac
-3. at the centre,  a 4 x 4 grid should be present 
+3. at the centre,  a medium size covering 1/3 of the sceen 4 x 4 grid should be present 
 4. there are 15 tiles ,numbered from 1 to 15 , each present in each square of the grid and 1 empty square is left
-5. on top of the grid , at the centre ,there should be a large bold heading '15 puzzle' of a contrasting darker colour 
-6. a timer in between the grid and the heading,at the left, which updates every second during the gameplay
-7. a counter named 'MOVES' in between the grid and the heading which updates after every move
-8. a pause button at the bottom of the grid 
-9. a restart button below the pause button 
-
+5. on top of the grid , at the centre ,there should be a large bold heading '15 puzzle' of a contrasting darker colour and the outline of the word letters should be meduim in size with another contrsting color to it 
+6. a timer in between the grid and the heading,at the left, which updates every second during the gameplay.
+   The timer must start on the first move and stop when the puzzle is solved.
+7. a counter named 'MOVES' in between the grid and the heading at the right which updates after every move
+8. a pause button at the bottom of the grid.
+   Pausing the game should also pause the timer. The board state should be preserved.
+9. a restart button below the pause button.
+   This button reverts the puzzle to the initial shuffled state of the current game, also resetting the 'MOVES' counter and timer to zero.
+   Before the restart occurs, the game should pause and display a confirmation prompt (e.g., "Are you sure you want to restart this game?").
+10. A 'New Game' button should be present (e.g., next to the Restart button).
+    This button will generate an entirely new, random, solvable puzzle grid, resetting the 'MOVES' counter and timer.
+    Before starting the new game, it should also pause the current game and display a confirmation prompt (e.g., "Are you sure you want to start a new game?").
+11. User Input: The user must be able to move tiles by either:
+    a. Clicking on a tile that is adjacent to the empty space.
+    b. Using the keyboard arrow keys (Up, Down, Left, Right).
+12. Win Condition & Feedback:
+    The game is won when tiles are arranged 1-15 from top-left to bottom-right, with the empty space in the final position.
+    Upon winning, the timer and move counter must stop, and a clear "You Win!" message should be displayed.
+13. Session Statistics Display:
+    A section of the UI must be dedicated to displaying statistics for the current session.
+    This section should show:
+        - Total games played in the session.
+        - Fastest time to solve in the session.
+        - Slowest time to solve in the session.

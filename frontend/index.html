@@ -4,22 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>15 Puzzle</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>15 Puzzle</h1>
-    <div id="game-container">
-        <div id="puzzle-grid"></div>
-        <div id="game-info">
-            <p>Moves: <span id="moves">0</span></p>
-            <p>Time: <span id="timer">0s</span></p>
-            <button id="shuffle-button">Shuffle</button>
+    <div class="container">
+        <h1>15 PUZZLE</h1>
+        <div class="game-info">
+            <div class="timer">Time: 0s</div>
+            <div class="moves">Moves: 0</div>
+        </div>
+        <div class="board-container">
+            <div class="board"></div>
+        </div>
+        <div class="buttons">
+            <button class="pause-btn">Pause</button>
+            <button class="restart-btn">Restart</button>
+            <button class="new-game-btn">New Game</button>
+        </div>
+        <div class="stats">
+            <h2>Session Stats</h2>
+            <p>Total Games: <span id="total-games">0</span></p>
+            <p>Fastest Time: <span id="fastest-time">N/A</span></p>
+            <p>Slowest Time: <span id="slowest-time">N/A</span></p>
         </div>
     </div>
-    <div id="win-message" style="display: none;"></div>
     <script src="script.js"></script>
 </body>
 </html>

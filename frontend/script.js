@@ -1,155 +1,214 @@
-const puzzleGrid = document.getElementById('puzzle-grid');
-const movesSpan = document.getElementById('moves');
-const timerSpan = document.getElementById('timer');
-const shuffleButton = document.getElementById('shuffle-button');
-const winMessage = document.getElementById('win-message');
+const board = document.querySelector('.board');
+const timerElement = document.querySelector('.timer');
+const movesElement = document.querySelector('.moves');
+const pauseBtn = document.querySelector('.pause-btn');
+const restartBtn = document.querySelector('.restart-btn');
+const newGameBtn = document.querySelector('.new-game-btn');
+const totalGamesElement = document.getElementById('total-games');
+const fastestTimeElement = document.getElementById('fastest-time');
+const slowestTimeElement = document.getElementById('slowest-time');
 
-const gridSize = 4;
 let tiles = [];
-let emptyTile = { row: 3, col: 3 };
-let moveCount = 0;
-let timer = 0;
-let timerInterval;
-let isGameStarted = false;
+let emptyTileIndex;
+let moves = 0;
+let timer;
+let time = 0;
+let isPaused = false;
+let gameStarted = false;
 
-function createTile(number, row, col) {
-    const tile = document.createElement('div');
-    tile.classList.add('tile');
-    if (number === null) {
-        tile.classList.add('empty');
-    } else {
-        const correctRow = Math.floor((number - 1) / gridSize);
-        const correctCol = (number - 1) % gridSize;
-        if (row === correctRow && col === correctCol) {
-            tile.classList.add('correct');
+let totalGames = 0;
+let fastestTime = null;
+let slowestTime = null;
+
+function createBoard() {
+    board.innerHTML = '';
+    tiles = [];
+    for (let i = 0; i < 16; i++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        if (i === 15) {
+            tile.classList.add('empty');
+            emptyTileIndex = 15;
+        } else {
+            tile.textContent = i + 1;
         }
+        tiles.push(tile);
+        board.appendChild(tile);
+
+        tile.addEventListener('click', () => {
+            if (!isPaused) {
+                const tileIndex = tiles.indexOf(tile);
+                moveTile(tileIndex);
+            }
+        });
     }
-    tile.textContent = number;
-    tile.style.gridRowStart = row + 1;
-    tile.style.gridColumnStart = col + 1;
-    tile.addEventListener('click', () => onTileClick(row, col));
-    return tile;
 }
 
-function renderGrid() {
-    puzzleGrid.innerHTML = '';
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            const tile = createTile(tiles[i][j], i, j);
-            puzzleGrid.appendChild(tile);
+function shuffleBoard() {
+    let puzzle = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+    do {
+        for (let i = puzzle.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [puzzle[i], puzzle[j]] = [puzzle[j], puzzle[i]];
+        }
+    } while (!isSolvable(puzzle));
+
+    for (let i = 0; i < 16; i++) {
+        const tile = tiles[i];
+        const value = puzzle[i];
+        tile.textContent = value === 0 ? '' : value;
+        if (value === 0) {
+            tile.classList.add('empty');
+            emptyTileIndex = i;
+        } else {
+            tile.classList.remove('empty');
         }
     }
 }
 
-function onTileClick(row, col) {
-    if (!isGameStarted) return;
+function isSolvable(puzzle) {
+    let inversions = 0;
+    for (let i = 0; i < 15; i++) {
+        for (let j = i + 1; j < 16; j++) {
+            if (puzzle[i] !== 0 && puzzle[j] !== 0 && puzzle[i] > puzzle[j]) {
+                inversions++;
+            }
+        }
+    }
 
-    const dr = Math.abs(row - emptyTile.row);
-    const dc = Math.abs(col - emptyTile.col);
+    const indexOfZero = puzzle.indexOf(0);
+    const rowOfEmptyTileFromTop = Math.floor(indexOfZero / 4);
+    const rowOfEmptyTileFromBottom = 4 - rowOfEmptyTileFromTop;
 
-    if (dr + dc === 1) {
-        moveTile(row, col);
+    return (inversions + rowOfEmptyTileFromBottom) % 2 === 1;
+}
+
+
+function moveTile(tileIndex) {
+    const emptyRow = Math.floor(emptyTileIndex / 4);
+    const emptyCol = emptyTileIndex % 4;
+    const tileRow = Math.floor(tileIndex / 4);
+    const tileCol = tileIndex % 4;
+
+    const isAdjacent = (Math.abs(emptyRow - tileRow) === 1 && emptyCol === tileCol) ||
+                       (Math.abs(emptyCol - tileCol) === 1 && emptyRow === tileRow);
+
+    if (isAdjacent) {
+        if (!gameStarted) {
+            startTimer();
+            gameStarted = true;
+        }
+
+        const tileValue = tiles[tileIndex].textContent;
+        tiles[emptyTileIndex].textContent = tileValue;
+        tiles[emptyTileIndex].classList.remove('empty');
+        tiles[tileIndex].textContent = '';
+        tiles[tileIndex].classList.add('empty');
+        emptyTileIndex = tileIndex;
+        moves++;
+        movesElement.textContent = `Moves: ${moves}`;
         checkWin();
     }
 }
 
-function moveTile(row, col) {
-    tiles[emptyTile.row][emptyTile.col] = tiles[row][col];
-    tiles[row][col] = null;
-    emptyTile = { row, col };
-    moveCount++;
-    updateGameInfo();
-    renderGrid();
-}
-
-function shuffle() {
-    winMessage.style.display = 'none';
-    isGameStarted = false; // Prevent moves during shuffle
-
-    // Start with a solved puzzle
-    let count = 1;
-    for (let i = 0; i < gridSize; i++) {
-        tiles[i] = [];
-        for (let j = 0; j < gridSize; j++) {
-            if (i === 3 && j === 3) {
-                tiles[i][j] = null;
-            } else {
-                tiles[i][j] = count++;
-            }
-        }
-    }
-    emptyTile = { row: 3, col: 3 };
-
-    // Make a large number of random moves
-    let shuffleMoves = 400;
-    let lastMove = null;
-
-    for (let i = 0; i < shuffleMoves; i++) {
-        const neighbors = [];
-        // up
-        if (emptyTile.row > 0 && lastMove !== 'down') neighbors.push({ row: emptyTile.row - 1, col: emptyTile.col, dir: 'up' });
-        // down
-        if (emptyTile.row < gridSize - 1 && lastMove !== 'up') neighbors.push({ row: emptyTile.row + 1, col: emptyTile.col, dir: 'down' });
-        // left
-        if (emptyTile.col > 0 && lastMove !== 'right') neighbors.push({ row: emptyTile.row, col: emptyTile.col - 1, dir: 'left' });
-        // right
-        if (emptyTile.col < gridSize - 1 && lastMove !== 'left') neighbors.push({ row: emptyTile.row, col: emptyTile.col + 1, dir: 'right' });
-
-        const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
-        
-        tiles[emptyTile.row][emptyTile.col] = tiles[randomNeighbor.row][randomNeighbor.col];
-        tiles[randomNeighbor.row][randomNeighbor.col] = null;
-        emptyTile = { row: randomNeighbor.row, col: randomNeighbor.col };
-        lastMove = randomNeighbor.dir;
-    }
-    
-    moveCount = 0;
-    startTimer();
-    isGameStarted = true;
-    updateGameInfo();
-    renderGrid();
-}
-
-function checkWin() {
-    let count = 1;
-    for (let i = 0; i < gridSize; i++) {
-        for (let j = 0; j < gridSize; j++) {
-            if (i === 3 && j === 3) {
-                if (tiles[i][j] !== null) return;
-            } else {
-                if (tiles[i][j] !== count++) return;
-            }
-        }
-    }
-    stopTimer();
-    isGameStarted = false;
-    winMessage.textContent = `Game won in ${moveCount} moves!`;
-    winMessage.style.display = 'block';
-}
-
 function startTimer() {
-    if (timerInterval) clearInterval(timerInterval);
-    timer = 0;
-    timerInterval = setInterval(() => {
-        timer++;
-        updateGameInfo();
+    timer = setInterval(() => {
+        if (!isPaused) {
+            time++;
+            timerElement.textContent = `Time: ${time}s`;
+        }
     }, 1000);
 }
 
 function stopTimer() {
-    clearInterval(timerInterval);
+    clearInterval(timer);
 }
 
-function updateGameInfo() {
-    movesSpan.textContent = moveCount;
-    timerSpan.textContent = `${timer}s`;
+function checkWin() {
+    for (let i = 0; i < 15; i++) {
+        if (tiles[i].textContent != i + 1) {
+            return;
+        }
+    }
+    stopTimer();
+    updateStats();
+    setTimeout(() => {
+        alert('You Win!');
+    }, 100);
 }
 
-function initGame() {
-    shuffle();
+function updateStats() {
+    totalGames++;
+    totalGamesElement.textContent = totalGames;
+    if (fastestTime === null || time < fastestTime) {
+        fastestTime = time;
+        fastestTimeElement.textContent = `${fastestTime}s`;
+    }
+    if (slowestTime === null || time > slowestTime) {
+        slowestTime = time;
+        slowestTimeElement.textContent = `${slowestTime}s`;
+    }
 }
 
+function resetGame() {
+    stopTimer();
+    moves = 0;
+    time = 0;
+    isPaused = false;
+    gameStarted = false;
+    movesElement.textContent = `Moves: ${moves}`;
+    timerElement.textContent = `Time: ${time}s`;
+    pauseBtn.textContent = 'Pause';
+}
 
-shuffleButton.addEventListener('click', shuffle);
+newGameBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to start a new game?')) {
+        resetGame();
+        createBoard();
+        shuffleBoard();
+    }
+});
 
-initGame();
+restartBtn.addEventListener('click', () => {
+    if (confirm('Are you sure you want to restart this game?')) {
+        resetGame();
+        shuffleBoard();
+    }
+});
+
+pauseBtn.addEventListener('click', () => {
+    isPaused = !isPaused;
+    pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+    if (isPaused) {
+        stopTimer();
+    } else {
+        startTimer();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (!isPaused) {
+        let tileIndexToMove = -1;
+        switch (e.key) {
+            case 'ArrowUp':
+                if (emptyTileIndex < 12) tileIndexToMove = emptyTileIndex + 4;
+                break;
+            case 'ArrowDown':
+                if (emptyTileIndex > 3) tileIndexToMove = emptyTileIndex - 4;
+                break;
+            case 'ArrowLeft':
+                if (emptyTileIndex % 4 < 3) tileIndexToMove = emptyTileIndex + 1;
+                break;
+            case 'ArrowRight':
+                if (emptyTileIndex % 4 > 0) tileIndexToMove = emptyTileIndex - 1;
+                break;
+        }
+        if (tileIndexToMove !== -1) {
+            moveTile(tileIndexToMove);
+        }
+    }
+});
+
+
+createBoard();
+shuffleBoard();
